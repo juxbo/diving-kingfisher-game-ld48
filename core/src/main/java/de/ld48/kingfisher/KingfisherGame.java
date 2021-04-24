@@ -13,6 +13,7 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
+import de.ld48.kingfisher.component.BirdStateComponent;
 import de.ld48.kingfisher.component.PositionComponent;
 import de.ld48.kingfisher.component.StaticPositionComponent;
 import de.ld48.kingfisher.component.VelocityComponent;
@@ -23,6 +24,8 @@ import de.ld48.kingfisher.system.WindMovementSystem;
  * {@link com.badlogic.gdx.ApplicationListener} implementation shared by all platforms.
  */
 public class KingfisherGame extends ApplicationAdapter {
+    public static final int Y_START = 340;
+
     private ShapeRenderer shapeRenderer;
     private SpriteBatch spriteBatch;
     private Engine engine;
@@ -47,12 +50,13 @@ public class KingfisherGame extends ApplicationAdapter {
         spriteBatch = new SpriteBatch();
 
         playerEntity = new Entity();
-        playerEntity.add(new PositionComponent());
+        playerEntity.add(new PositionComponent(220, Y_START));
         playerEntity.add(new VelocityComponent());
+        playerEntity.add(new BirdStateComponent(BirdStateComponent.BirdState.INITIAL));
 
         branchEntity = new Entity();
-        branchEntity.add(new PositionComponent(0, 140));
-        branchEntity.add(new StaticPositionComponent(0, 140));
+        branchEntity.add(new PositionComponent(0, Y_START));
+        branchEntity.add(new StaticPositionComponent(0, Y_START));
 
         engine = new Engine();
         engine.addEntity(playerEntity);
@@ -67,7 +71,7 @@ public class KingfisherGame extends ApplicationAdapter {
         stage = new Stage(viewport);
 
         music = Gdx.audio.newMusic(Gdx.files.internal("dumdidum.wav"));
-        music.setVolume(.5f);
+        music.setVolume(.3f);
         music.setLooping(true);
         music.play();
 
@@ -91,10 +95,22 @@ public class KingfisherGame extends ApplicationAdapter {
         PositionComponent branchPositionComponent = branchEntity.getComponent(PositionComponent.class);
         PositionComponent playerPositionComponent = playerEntity.getComponent(PositionComponent.class);
         VelocityComponent playerVelocityComponent = playerEntity.getComponent(VelocityComponent.class);
+        BirdStateComponent playerStateComponent = playerEntity.getComponent(BirdStateComponent.class);
+
         if (Gdx.input.isKeyJustPressed(Input.Keys.LEFT)) {
             playerVelocityComponent.x = -100;
         } else if (Gdx.input.isKeyJustPressed(Input.Keys.RIGHT)) {
             playerVelocityComponent.x = 100;
+        }
+
+        if (Gdx.input.isKeyJustPressed(Input.Keys.SPACE)) {
+            if (playerStateComponent.state.equals(BirdStateComponent.BirdState.INITIAL)) {
+                playerVelocityComponent.y = 100;
+                playerStateComponent.nextState();
+            }
+            if (playerStateComponent.state.equals(BirdStateComponent.BirdState.ASCENDING)) {
+                playerVelocityComponent.y = 100;
+            }
         }
 
         viewport.apply();
