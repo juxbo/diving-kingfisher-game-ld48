@@ -10,7 +10,7 @@ import java.util.concurrent.ThreadLocalRandom;
 public class WindMovementSystem extends EntitySystem {
     private final ComponentMapper<StaticPositionComponent> spm = ComponentMapper.getFor(StaticPositionComponent.class);
     private final ComponentMapper<PositionComponent> pm = ComponentMapper.getFor(PositionComponent.class);
-    private final int maxMovement = 180;
+    private final int maxMovement = 20;
     private ImmutableArray<Entity> entities;
 
     @Override
@@ -22,7 +22,7 @@ public class WindMovementSystem extends EntitySystem {
 
     @Override
     public void update(float deltaTime) {
-        int movementY = (int) (maxMovement * deltaTime);
+        float movementY = maxMovement * deltaTime;
         boolean up = ThreadLocalRandom.current().nextInt(3) == 0;
 
         for (Entity e : entities) {
@@ -30,9 +30,9 @@ public class WindMovementSystem extends EntitySystem {
             StaticPositionComponent staticPositionComponent = spm.get(e);
 
             if (up) {
-                positionComponent.y += movementY * deltaTime;
+                positionComponent.y += movementY;
             } else {
-                positionComponent.y -= movementY * deltaTime;
+                positionComponent.y -= movementY;
             }
             if (positionComponent.y < staticPositionComponent.y - maxMovement) {
                 positionComponent.y = staticPositionComponent.y - maxMovement;
