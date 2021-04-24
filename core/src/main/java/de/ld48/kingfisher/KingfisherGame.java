@@ -5,6 +5,7 @@ import com.badlogic.ashley.core.Entity;
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
+import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
@@ -30,6 +31,8 @@ public class KingfisherGame extends ApplicationAdapter {
     private Viewport viewport;
     private Stage stage;
 
+    private Music music;
+
     @Override
     public void create() {
         super.create();
@@ -46,6 +49,11 @@ public class KingfisherGame extends ApplicationAdapter {
         camera = new OrthographicCamera(640, 480);
         viewport = new FitViewport(640, 480, camera);
         stage = new Stage(viewport);
+
+        music = Gdx.audio.newMusic(Gdx.files.internal("dumdidum.wav"));
+        music.setVolume(.5f);
+        music.setLooping(true);
+        music.play();
     }
 
     @Override
