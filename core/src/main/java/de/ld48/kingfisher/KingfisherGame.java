@@ -8,8 +8,8 @@ import com.badlogic.gdx.Input;
 import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
+import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
@@ -34,13 +34,14 @@ public class KingfisherGame extends ApplicationAdapter {
     private WindMovementSystem windMovementSystem;
 
     private Camera camera;
+    private final float LERP = .6f;
     private Viewport viewport;
     private Stage stage;
 
     private Music music;
 
-    private TextureRegion background;
-    private TextureRegion branch;
+    private Texture background;
+    private Texture branch;
     private Entity branchEntity;
 
     @Override
@@ -75,8 +76,8 @@ public class KingfisherGame extends ApplicationAdapter {
         music.setLooping(true);
         music.play();
 
-        background = new TextureRegion(new Texture("bg2.png"), 640, 480);
-        branch = new TextureRegion(new Texture("branchalt.png"), 281, 79);
+        background = new Texture("bg2.png");
+        branch = new Texture("branchalt.png");
     }
 
     @Override
@@ -87,10 +88,11 @@ public class KingfisherGame extends ApplicationAdapter {
     @Override
     public void render() {
         super.render();
-        Gdx.gl.glClearColor(1, 1, 1, 0);
+        Gdx.gl.glClearColor(0.3f, 0.3f, 1, 0);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
-        engine.update(Gdx.graphics.getDeltaTime());
+        float deltaTime = Gdx.graphics.getDeltaTime();
+        engine.update(deltaTime);
 
         PositionComponent branchPositionComponent = branchEntity.getComponent(PositionComponent.class);
         PositionComponent playerPositionComponent = playerEntity.getComponent(PositionComponent.class);
@@ -113,11 +115,16 @@ public class KingfisherGame extends ApplicationAdapter {
             }
         }
 
+        Vector3 position = camera.position;
+        position.x += (playerPositionComponent.x - position.x + 50) * LERP * deltaTime;
+        position.y += (playerPositionComponent.y - position.y) * LERP * deltaTime;
+        camera.update();
+
         viewport.apply();
-        shapeRenderer.setProjectionMatrix(viewport.getCamera().combined);
-        spriteBatch.setProjectionMatrix(viewport.getCamera().combined);
+        shapeRenderer.setProjectionMatrix(camera.combined);
+        spriteBatch.setProjectionMatrix(camera.combined);
         spriteBatch.begin();
-        spriteBatch.draw(background, 0, 0);
+        spriteBatch.draw(background, -background.getWidth() / 2, 0);
         spriteBatch.draw(branch, branchPositionComponent.x, branchPositionComponent.y);
         spriteBatch.end();
 
@@ -125,6 +132,7 @@ public class KingfisherGame extends ApplicationAdapter {
         shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
         shapeRenderer.rect(playerPositionComponent.x, playerPositionComponent.y, 100, 100);
         shapeRenderer.end();
+
         stage.getViewport().apply();
         stage.draw();
     }
