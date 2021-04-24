@@ -6,26 +6,29 @@ import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.audio.Music;
-import com.badlogic.gdx.graphics.Camera;
-import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.GL20;
-import com.badlogic.gdx.graphics.OrthographicCamera;
+import com.badlogic.gdx.graphics.*;
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import de.ld48.kingfisher.component.PositionComponent;
+import de.ld48.kingfisher.component.StaticPositionComponent;
 import de.ld48.kingfisher.component.VelocityComponent;
 import de.ld48.kingfisher.system.MovementSystem;
+import de.ld48.kingfisher.system.WindMovementSystem;
 
 /**
  * {@link com.badlogic.gdx.ApplicationListener} implementation shared by all platforms.
  */
 public class KingfisherGame extends ApplicationAdapter {
     private ShapeRenderer shapeRenderer;
+    private SpriteBatch spriteBatch;
     private Engine engine;
     private Entity playerEntity;
     private MovementSystem movementSystem;
+    private WindMovementSystem windMovementSystem;
 
     private Camera camera;
     private Viewport viewport;
@@ -33,18 +36,31 @@ public class KingfisherGame extends ApplicationAdapter {
 
     private Music music;
 
+    private TextureRegion background;
+    private TextureRegion branch;
+    private Entity branchEntity;
+
     @Override
     public void create() {
         super.create();
         shapeRenderer = new ShapeRenderer();
+        spriteBatch = new SpriteBatch();
+
         playerEntity = new Entity();
         playerEntity.add(new PositionComponent());
         playerEntity.add(new VelocityComponent());
 
+        branchEntity = new Entity();
+        branchEntity.add(new PositionComponent(0, 140));
+        branchEntity.add(new StaticPositionComponent(0, 140));
+
         engine = new Engine();
         engine.addEntity(playerEntity);
+        engine.addEntity(branchEntity);
         movementSystem = new MovementSystem();
+        windMovementSystem = new WindMovementSystem();
         engine.addSystem(movementSystem);
+        engine.addSystem(windMovementSystem);
 
         camera = new OrthographicCamera(640, 480);
         viewport = new FitViewport(640, 480, camera);
@@ -54,6 +70,9 @@ public class KingfisherGame extends ApplicationAdapter {
         music.setVolume(.5f);
         music.setLooping(true);
         music.play();
+
+        background = new TextureRegion(new Texture("bg2.png"), 640, 480);
+        branch = new TextureRegion(new Texture("branchalt.png"), 281, 79);
     }
 
     @Override
@@ -69,6 +88,7 @@ public class KingfisherGame extends ApplicationAdapter {
 
         engine.update(Gdx.graphics.getDeltaTime());
 
+        PositionComponent branchPositionComponent = branchEntity.getComponent(PositionComponent.class);
         PositionComponent playerPositionComponent = playerEntity.getComponent(PositionComponent.class);
         VelocityComponent playerVelocityComponent = playerEntity.getComponent(VelocityComponent.class);
         if (Gdx.input.isKeyJustPressed(Input.Keys.LEFT)) {
@@ -79,6 +99,12 @@ public class KingfisherGame extends ApplicationAdapter {
 
         viewport.apply();
         shapeRenderer.setProjectionMatrix(viewport.getCamera().combined);
+        spriteBatch.setProjectionMatrix(viewport.getCamera().combined);
+        spriteBatch.begin();
+        spriteBatch.draw(background, 0, 0);
+        spriteBatch.draw(branch, branchPositionComponent.x, branchPositionComponent.y);
+        spriteBatch.end();
+
         shapeRenderer.setColor(Color.RED);
         shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
         shapeRenderer.rect(playerPositionComponent.x, playerPositionComponent.y, 100, 100);

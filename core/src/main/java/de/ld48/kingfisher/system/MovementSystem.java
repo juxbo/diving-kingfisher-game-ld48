@@ -8,8 +8,8 @@ import de.ld48.kingfisher.component.VelocityComponent;
 public class MovementSystem extends EntitySystem {
     private ImmutableArray<Entity> entities;
 
-    private ComponentMapper<PositionComponent> pm = ComponentMapper.getFor(PositionComponent.class);
-    private ComponentMapper<VelocityComponent> vm = ComponentMapper.getFor(VelocityComponent.class);
+    private final ComponentMapper<PositionComponent> pm = ComponentMapper.getFor(PositionComponent.class);
+    private final ComponentMapper<VelocityComponent> vm = ComponentMapper.getFor(VelocityComponent.class);
 
     @Override
     public void addedToEngine(Engine engine) {
